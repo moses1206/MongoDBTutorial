@@ -1,9 +1,8 @@
 const express = require('express');
 const app = express();
 const config = require('./config/key');
-const { userRouter } = require('./routes/userRoute');
-const { blogRouter } = require('./routes/blogRoute');
-const { commentRouter } = require('./routes/commentRoute');
+const { blogRouter, commentRouter, userRouter } = require('./routes');
+const { generateFakeData } = require('../faker');
 
 const mongoose = require('mongoose');
 
@@ -13,6 +12,10 @@ const server = async () => {
     mongoose.set('debug', true);
     console.log('MongoDB Connected !!');
     app.use(express.json());
+
+    // Faker Data insert
+    // 100명의 유저가 10개의 포스트를 작성하고 30개의 댓글을 입력한다.
+    // await generateFakeData(100, 10, 300);
 
     // Router Setting
     app.use('/user', userRouter);

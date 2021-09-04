@@ -1,8 +1,6 @@
 const { Router } = require('express');
 const commentRouter = Router({ mergeParams: true });
-const { Comment } = require('../models/Comment');
-const { Blog } = require('../models/Blog');
-const { User } = require('../models/User');
+const { Comment, Blog, User } = require('../models');
 const { isValidObjectId } = require('mongoose');
 
 // blog/:blogId/comment/:commentId
@@ -13,6 +11,7 @@ commentRouter.post('/', async (req, res) => {
     const { blogId } = req.params;
     const { content, userId } = req.body;
 
+    console.log(blogId);
     if (!isValidObjectId(blogId))
       return res.status(400).send({ err: 'blogId is invalid' });
 
@@ -31,9 +30,12 @@ commentRouter.post('/', async (req, res) => {
     if (!blog || !user)
       return res.status(400).send({ err: 'blog or user dose not exist' });
 
-    if (!blog.islive) res.status(400).send({ err: 'blog is not available' });
+    if (!blog.islive)
+      return res.status(400).send({ err: 'blog is not available' });
 
     const comment = new Comment({ content, user, blog });
+
+    await comment.save();
 
     return res.send({ comment });
   } catch (err) {
@@ -41,6 +43,14 @@ commentRouter.post('/', async (req, res) => {
   }
 });
 
-commentRouter.get('/');
+commentRouter.get('/', async (req, res) => {
+  const { blogId } = req.params;
+
+  if (!isValidObjectId(blogId))
+    return res.status(400).send({ err: 'blogId is invalid' });
+
+  const comments = await Comment.find({ blog: blogId });
+  return res.send({ comments });
+});
 
 module.exports = { commentRouter };
