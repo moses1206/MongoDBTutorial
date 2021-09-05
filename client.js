@@ -3,7 +3,11 @@ const axios = require('axios');
 
 const URI = 'http://localhost:3000';
 
+// 비효율적인 방법 : blogCount = 20 => 6초
+// 비효율적인 방법 : blogCount = 50 => 20초
+
 const test = async () => {
+  console.time('loading time: ');
   // Get Blog Data
   let {
     data: { blogs },
@@ -31,7 +35,18 @@ const test = async () => {
       return blog;
     })
   );
-  console.dir(blogs[0], { depth: 10 });
+  console.timeEnd('loading time: ');
 };
 
-test();
+const testGroup = async () => {
+  await test();
+  await test();
+  await test();
+  await test();
+  await test();
+  await test();
+  await test();
+  await test();
+};
+
+testGroup();
