@@ -24,9 +24,10 @@ blogRouter.post('/', async (req, res) => {
 
     let user = await User.findById(userId);
     if (!user) res.status(400).send({ err: 'user dose not exist' });
+    console.log('UUU', user);
 
-    // user를 가져온 풀데이터로 교체
-    let blog = new Blog({ ...req.body, user: user });
+    // user를 가져온 풀데이터로 교체. 몽구스 버전업으로 반드시 toObject()를 붙여야함.
+    let blog = new Blog({ ...req.body, user: user.toObject() });
     await blog.save();
 
     return res.send({ blog });
@@ -38,7 +39,13 @@ blogRouter.post('/', async (req, res) => {
 
 blogRouter.get('/', async (req, res) => {
   try {
-    const blogs = await Blog.find({}).limit(50);
+    const blogs = await Blog.find({})
+      .limit(20)
+      // 몽구스에게 userId로 user 모델을 완성시켜라!
+      .populate([
+        { path: 'user' },
+        { path: 'comments', populate: { path: 'user' } },
+      ]);
     return res.send({ blogs });
   } catch (err) {
     console.log(err);
